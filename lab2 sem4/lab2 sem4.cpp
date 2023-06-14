@@ -110,15 +110,33 @@ public:
         }
     }
 
+    void removeProduct(Product* product) {
+        if (products.find(product) != products.end()) {
+            if (products[product] > 1) {
+                products[product] -= 1;  // Уменьшаем количество товара
+            }
+            else {
+                products.erase(product);  // Удаляем товар из корзины
+            }
+        }
+    }
+
     void printCart() const {
         std::cout << "Cart:" << std::endl;
         double totalPrice = 0.0;
+        int count = 1;
         for (const auto& item : products) {
             Product* product = item.first;
             int quantity = item.second;
             double productPrice = product->getPrice() * quantity;
+
+            if (count % 3 == 0) {
+                productPrice *= 0.9;  // Застосовуємо знижку 10% до кожного третього товару
+            }
+
             std::cout << "Product: " << product->getName() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
             totalPrice += productPrice;
+            count++;
         }
         std::cout << "Total Price: " << totalPrice << std::endl;
     }
@@ -154,6 +172,7 @@ int main() {
     // Добавление товаров в корзины
     users["Alice"]->addProduct(product1);
     users["Alice"]->addProduct(product3);
+    users["Alice"]->addProduct(product2);
     users["Bob"]->addProduct(product2);
     users["Bob"]->addProduct(product4);
 
@@ -164,10 +183,29 @@ int main() {
         std::cout << std::endl;
     }
 
+    // Удаление товаров из корзин
+    users["Alice"]->removeProduct(product1);
+    users["Bob"]->removeProduct(product2);
+
+    // Вывод обновленных заказов и общей цены для каждого пользователя
+    std::cout << "Updated Carts:" << std::endl;
+    for (const auto& user : users) {
+        std::cout << "User: " << user.first << std::endl;
+        user.second->printCart();
+        std::cout << std::endl;
+    }
+
     // Освобождение памяти
     for (const auto& user : users) {
         delete user.second;
     }
+
+    delete product1;
+    delete product2;
+    delete product3;
+    delete product4;
+    delete category1;
+    delete category2;
 
     return 0;
 }
