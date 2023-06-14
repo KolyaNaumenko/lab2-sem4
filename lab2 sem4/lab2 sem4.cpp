@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <vector>
+#include <map>
 
 class Category;
 
@@ -93,15 +94,33 @@ public:
     std::vector<Product*> getProductsByCategory(const Category* category) const {
         return factory->getProductsByCategory(category);
     }
+};
 
-    void printAllProducts() const {
-        std::cout << "All Products:" << std::endl;
-        for (const Category* category : categories) {
-            std::vector<Product*> products = getProductsByCategory(category);
-            for (const Product* product : products) {
-                std::cout << "Category: " << category->getName() << ", Product: " << product->getName() << ", Price: " << product->getPrice() << std::endl;
-            }
+class Cart {
+private:
+    std::map<Product*, int> products;  // Карта для отслеживания товаров и их количества
+
+public:
+    void addProduct(Product* product) {
+        if (products.find(product) != products.end()) {
+            products[product] += 1;  // Увеличиваем количество товара
         }
+        else {
+            products[product] = 1;   // Добавляем товар в корзину
+        }
+    }
+
+    void printCart() const {
+        std::cout << "Cart:" << std::endl;
+        double totalPrice = 0.0;
+        for (const auto& item : products) {
+            Product* product = item.first;
+            int quantity = item.second;
+            double productPrice = product->getPrice() * quantity;
+            std::cout << "Product: " << product->getName() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
+            totalPrice += productPrice;
+        }
+        std::cout << "Total Price: " << totalPrice << std::endl;
     }
 };
 
@@ -111,16 +130,10 @@ int main() {
     Category* category2 = new Category("Clothing");
 
     // Создание товаров
-    Product* product1 = new Product("Smartphone1", 500.0, category1);
-    Product* product2 = new Product("Laptop1", 700.0, category1);
-    Product* product3 = new Product("Smartphone2", 600.0, category1);
-    Product* product4 = new Product("Laptop2", 900.0, category1);
-    Product* product5 = new Product("Smartphone3", 800.0, category1);
-    Product* product6 = new Product("Laptop3", 1111.0, category1);
-    Product* product7 = new Product("Smartphone4", 1000.0, category1);
-    Product* product8 = new Product("Laptop4", 1500.0, category1);
-    Product* product9 = new Product("T-Shirt", 20.0, category2);
-    Product* product10 = new Product("Jeans", 50.0, category2);
+    Product* product1 = new Product("Smartphone", 1000.0, category1);
+    Product* product2 = new Product("Laptop", 1500.0, category1);
+    Product* product3 = new Product("T-Shirt", 20.0, category2);
+    Product* product4 = new Product("Jeans", 50.0, category2);
 
     // Создание каталога
     Catalog catalog;
@@ -130,17 +143,31 @@ int main() {
     // Добавление товаров в категории
     catalog.addProductToCategory(product1, category1);
     catalog.addProductToCategory(product2, category1);
-    catalog.addProductToCategory(product3, category1);
-    catalog.addProductToCategory(product4, category1);
-    catalog.addProductToCategory(product5, category1);
-    catalog.addProductToCategory(product6, category1);
-    catalog.addProductToCategory(product7, category1);
-    catalog.addProductToCategory(product8, category1);
-    catalog.addProductToCategory(product9, category2);
-    catalog.addProductToCategory(product10, category2);
+    catalog.addProductToCategory(product3, category2);
+    catalog.addProductToCategory(product4, category2);
 
-    // Вывод всех товаров
-    catalog.printAllProducts();
+    // Создание пользователей и корзин
+    std::map<std::string, Cart*> users;
+    users["Alice"] = new Cart();
+    users["Bob"] = new Cart();
+
+    // Добавление товаров в корзины
+    users["Alice"]->addProduct(product1);
+    users["Alice"]->addProduct(product3);
+    users["Bob"]->addProduct(product2);
+    users["Bob"]->addProduct(product4);
+
+    // Вывод заказов и общей цены для каждого пользователя
+    for (const auto& user : users) {
+        std::cout << "User: " << user.first << std::endl;
+        user.second->printCart();
+        std::cout << std::endl;
+    }
+
+    // Освобождение памяти
+    for (const auto& user : users) {
+        delete user.second;
+    }
 
     return 0;
 }
