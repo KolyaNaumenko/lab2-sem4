@@ -97,11 +97,13 @@ public:
 };
 
 class Cart {
-private:
+protected:
     std::map<Product*, int> products;  // Карта для отслеживания товаров и их количества
 
 public:
-    void addProduct(Product* product) {
+    virtual ~Cart() = default;
+
+    virtual void addProduct(Product* product) {
         if (products.find(product) != products.end()) {
             products[product] += 1;  // Увеличиваем количество товара
         }
@@ -110,7 +112,7 @@ public:
         }
     }
 
-    void removeProduct(Product* product) {
+    virtual void removeProduct(Product* product) {
         if (products.find(product) != products.end()) {
             if (products[product] > 1) {
                 products[product] -= 1;  // Уменьшаем количество товара
@@ -121,8 +123,25 @@ public:
         }
     }
 
-    void printCart() const {
+    virtual void printCart() const {
         std::cout << "Cart:" << std::endl;
+        double totalPrice = 0.0;
+        for (const auto& item : products) {
+            Product* product = item.first;
+            int quantity = item.second;
+            double productPrice = product->getPrice() * quantity;
+
+            std::cout << "Product: " << product->getName() << ", Quantity: " << quantity << ", Price: " << productPrice << std::endl;
+            totalPrice += productPrice;
+        }
+        std::cout << "Total Price: " << totalPrice << std::endl;
+    }
+};
+
+class CartDecorator : public Cart {
+public:
+    void printCart() const override {
+        std::cout << "Cart with discount:" << std::endl;
         double totalPrice = 0.0;
         int count = 1;
         for (const auto& item : products) {
@@ -166,20 +185,22 @@ int main() {
 
     // Создание пользователей и корзин
     std::map<std::string, Cart*> users;
-    users["Alice"] = new Cart();
+    users["Alice"] = new CartDecorator();  // Используем декоратор для корзины пользователя Alice
     users["Bob"] = new Cart();
 
     // Добавление товаров в корзины
     users["Alice"]->addProduct(product1);
     users["Alice"]->addProduct(product3);
     users["Alice"]->addProduct(product2);
+    users["Alice"]->addProduct(product4);
     users["Bob"]->addProduct(product2);
+    users["Bob"]->addProduct(product3);
     users["Bob"]->addProduct(product4);
 
     // Вывод заказов и общей цены для каждого пользователя
     for (const auto& user : users) {
         std::cout << "User: " << user.first << std::endl;
-        user.second->printCart();
+        user.second->printCart();  // Вывод с учетом декоратора
         std::cout << std::endl;
     }
 
@@ -191,7 +212,7 @@ int main() {
     std::cout << "Updated Carts:" << std::endl;
     for (const auto& user : users) {
         std::cout << "User: " << user.first << std::endl;
-        user.second->printCart();
+        user.second->printCart();  // Вывод с учетом декоратора
         std::cout << std::endl;
     }
 
@@ -199,13 +220,7 @@ int main() {
     for (const auto& user : users) {
         delete user.second;
     }
-
-    delete product1;
-    delete product2;
-    delete product3;
-    delete product4;
-    delete category1;
-    delete category2;
+    users.clear();  // Очищення мапи
 
     return 0;
 }
