@@ -185,7 +185,7 @@ int main() {
 
     // Создание пользователей и корзин
     std::map<std::string, Cart*> users;
-    users["Alice"] = new CartDecorator();  // Используем декоратор для корзины пользователя Alice
+    users["Alice"] = new CartDecorator();  
     users["Bob"] = new Cart();
 
     // Добавление товаров в корзины
@@ -200,7 +200,7 @@ int main() {
     // Вывод заказов и общей цены для каждого пользователя
     for (const auto& user : users) {
         std::cout << "User: " << user.first << std::endl;
-        user.second->printCart();  // Вывод с учетом декоратора
+        user.second->printCart();  
         std::cout << std::endl;
     }
 
@@ -212,7 +212,7 @@ int main() {
     std::cout << "Updated Carts:" << std::endl;
     for (const auto& user : users) {
         std::cout << "User: " << user.first << std::endl;
-        user.second->printCart();  // Вывод с учетом декоратора
+        user.second->printCart();  
         std::cout << std::endl;
     }
 
@@ -220,7 +220,7 @@ int main() {
     for (const auto& user : users) {
         delete user.second;
     }
-    users.clear();  // Очищення мапи
+   
 
     return 0;
 }
